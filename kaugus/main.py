@@ -8,6 +8,7 @@
 from enum import Enum
 import math
 from dataclasses import dataclass
+import keyboard_maker as kb
 
 class f(Enum):
     lp = 0
@@ -36,14 +37,7 @@ class key:
         else:
             self.offset = -0.25
 
-keyboard = {
-    #left hand                                                                                                                         #right hand
-    'q': key(0.0, 0.0, f.lp), 'w': key(1.0, 0.0, f.lr), 'e': key(2.0, 0.0, f.lm), 'r': key(3.0, 0.0, f.li), 't': key(4.0, 0.0, f.li),  'y': key(5.0, 0.0, f.ri), 'u': key(6.0, 0.0, f.ri), 'i': key(7.0, 0.0, f.rm), 'o': key(8.0, 0.0, f.rr), 'p': key(9.0, 0.0, f.rp), 'ü': key(10.0, 0.0, f.rp), 'õ': key(11.0, 0.0, f.rp),
-    'a': key(0.0, 1.0, f.lp), 's': key(1.0, 1.0, f.lr), 'd': key(2.0, 1.0, f.lm), 'f': key(3.0, 1.0, f.li), 'g': key(4.0, 1.0, f.li),  'h': key(5.0, 1.0, f.ri), 'j': key(6.0, 1.0, f.ri), 'k': key(7.0, 1.0, f.rm), 'l': key(8.0, 1.0, f.rr), 'ö': key(9.0, 1.0, f.rp), 'ä': key(10.0, 1.0, f.rp), "'": key(11.0, 1.0, f.rp),
-    '<': key(0.0, 2.0, f.lp), 'z': key(1.0, 2.0, f.lp), 'x': key(2.0, 2.0, f.lr), 'c': key(3.0, 2.0, f.lm), 'v': key(4.0, 2.0, f.li),  'b': key(5.0, 2.0, f.li), 'n': key(6.0, 2.0, f.ri), 'm': key(7.0, 2.0, f.ri), ',': key(8.0, 2.0, f.rm), '.': key(9.0, 2.0, f.rr), '-': key(10.0, 2.0, f.rp),
-    #thumbsd
-    ' ': key(4.0, 1.0, f.thumb),
-}
+
 
 letter_freq = {}
 
@@ -54,7 +48,6 @@ def finger_distance(char1,char2):
     if char1 not in keyboard or char2 not in keyboard:
         return 4
 
-    letter_freq[char1] = letter_freq.get(char1,0) + 1
 
     prev_char = keyboard[char1]
     current_char = keyboard[char2]
@@ -74,11 +67,13 @@ def text_distance(text):
         text_file.close()
     return total_distance
 
+keyboard = {}
 
 if __name__ == "__main__":
     text = "test.txt"
     distance = text_distance(text)
+    keyboard = kb.make_layout("kboard.txt")
     print(f"The total distance needed to write the text is: {distance} units.")
 
-    for keys in keyboard.items():
-        print(f"Letter {keys}")
+    #for keys in keyboard.items():
+    #    print(f"Letter {keys}")

@@ -1,9 +1,14 @@
+ #   keyboard = {
+ #       'q': (1,0), 'w': (1,1), 'e': (1,2), 'r': (1,3), 't': (2,3), 'y': (2,4), 'u': (1,4), 'i': (1,5), 'o': (1,6), 'p': (1,7),'ü': (1,8),'õ': (2,8),
+ #       'a': (0,0), 's': (0,1), 'd': (0,2), 'f': (0,3), 'g': (1,3), 'h': (1,4), 'j': (0,4), 'k': (0,5), 'l': (0,6), 'ö': (0,7),'ä': (1,8),
+#        'z': (1,0), 'x': (1,1), 'c': (1,2), 'v': (1,3), 'b': (2,3), 'n': (1,4), 'm': (1,4), ',': (1,5), '.': (1,6), '-': (2,7),
+#        ' ': (0,9)  # Space key
+#    }
+
 from enum import Enum
 import math
 from dataclasses import dataclass
-
-false = False
-true = True
+import keyboard_maker as kb
 
 class f(Enum):
     lp = 0
@@ -21,61 +26,69 @@ class f(Enum):
 class key:
     x : float
     y : float
-    finger : f = f.li
-    home_row: bool = false
+    finger : f
     offset: float = 0.0
 
     def __post_init__(self):
-        if self.y > 1.0:
+        if self.y == 0.0:
             self.offset = 0.0;
-        elif self.y > 0.0:
+        elif self.y == 1.0:
             self.offset = 0.25
         else:
-            self.offset = 0.75
+            self.offset = -0.25
 
-keyboard = {
-    #left hand                                                                                                                         #right hand
-    'q': key(0.0, 0.0, f.lp), 'w': key(1.0, 0.0, f.lr), 'e': key(2.0, 0.0, f.lm), 'r': key(3.0, 0.0, f.li), 't': key(4.0, 0.0, f.li),  'y': key(5.0, 0.0, f.ri), 'u': key(6.0, 0.0, f.ri), 'i': key(7.0, 0.0, f.rm), 'o': key(8.0, 0.0, f.rr), 'p': key(9.0, 0.0, f.rp), 'ü': key(10.0, 0.0, f.rp), 'õ': key(11.0, 0.0, f.rp),
-    'a': key(0.0, 1.0, f.lp), 's': key(1.0, 1.0, f.lr), 'd': key(2.0, 1.0, f.lm), 'f': key(3.0, 1.0, f.li), 'g': key(4.0, 1.0, f.li),  'h': key(5.0, 1.0, f.ri), 'j': key(6.0, 1.0, f.ri), 'k': key(7.0, 1.0, f.rm), 'l': key(8.0, 1.0, f.rr), 'ö': key(9.0, 1.0, f.rp), 'ä': key(10.0, 1.0, f.rp), "'": key(11.0, 1.0, f.rp),
-    '<': key(-1.0, 2.0, f.lp), 'z': key(0.0, 2.0, f.lp), 'x': key(1.0, 2.0, f.lr), 'c': key(2.0, 2.0, f.lm), 'v': key(3.0, 2.0, f.li),  'b': key(4.0, 2.0, f.li), 'n': key(5.0, 2.0, f.ri), 'm': key(6.0, 2.0, f.ri), ',': key(7.0, 2.0, f.rm), '.': key(8.0, 2.0, f.rr), '-': key(9.0, 2.0, f.rp),
-    #thumbsd
-    ' ': key(4.0, 1.0, f.thumb),
-}
+last_finger = f.ri
+keyboard = {}
+last_pos_of_fingers = {}
+letter_freq = {}
 
-kb = {}
+def finger_distance(char1):
+    global last_finger
+    char1 = char1.lower()
 
-def make_layout(file):
-    remapped_dict = {}
-    home_row = {}
-    with open(file, 'r', encoding='utf-8') as file:
-        j = -1
-        for line in file:
-            if j == -1:
-                for i in range(len(line)-1):
-                    home_row[line[i]] = f(i)
-            else:
-                for i in range(len(line)-1):
-                    h = False
-                    if line[i] in home_row:
-                        remapped_dict[line[i]] = key(i,j,f(8),h)
-                    else:
-                        remapped_dict[line[i]] = key(i,j,f(i%3),h)
-            j += 1
+    if char1 not in keyboard:
+        return 3.0
 
-        #siin tuleb kuidagi näpud ära mäpida
-        
+    x = 0.0
+    current_char = keyboard[char1]
+    for last, letter in last_pos_of_fingers.items():
+        if current_char.finger.value == last.value:
+            x = math.sqrt(((current_char.x + current_char.offset) - (keyboard[letter].x + keyboard[letter].offset) ) ** 2
+                          + (current_char.y - keyboard[letter].y) ** 2)
+            last_pos_of_fingers[last] = char1
 
-    return remapped_dict
+    if last_finger.value != current_char.finger.value:
+        for letters, keys in keyboard.items():
+            if keys.finger.value == last_finger.value and keys.home_row:
+                last_pos_of_fingers[keys.finger] = letters
+        last_finger = f(current_char.finger.value)
+
+    return x
 
 
-keyboard2 = make_layout("kboard.txt")
-i = 1
-for key, f in keyboard2.items():
-    #, f.x,f.y,f.finger,f.home_row
-    if f.home_row:
-        print(f"{key} {f.finger}", end='- ')
-    else:
-        print(f"{key} {f.finger}",end='  ')
-    if i % 12 == 0:
-        print()
-    i += 1
+def text_distance(text):
+    total_distance = 0.0
+
+    with open(text, encoding='utf-8') as text_file:
+        for line in text_file:
+            for i in range(len(line)):
+                distance = finger_distance(line[i])
+                total_distance += distance
+        text_file.close()
+    return total_distance
+
+
+
+text = "text.txt"
+keyboard = kb.make_layout("kboard.txt")
+
+#set defaiult pos to home row
+for l, k in keyboard.items():
+    if k.home_row:
+        last_pos_of_fingers[k.finger] = l
+
+distance = text_distance(text)
+print(f"The total distance needed to write the text is: {distance} units.")
+
+for letter, keys in keyboard.items():
+    print(f"{letter}",end=' ')
