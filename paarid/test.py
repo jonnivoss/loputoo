@@ -75,6 +75,28 @@ def print_list(matrix, letters):
         print(str(entry[2]).rjust(max_length))
 
 
+def something(data):
+    letters = set()
+    for key in data.keys():
+        letters.add(key[0])
+        letters.add(key[1])
+    letters = sorted(list(letters))
+    print(letters)
+    singel_list = {}
+    for key, value in data.items():
+        if key[0] in singel_list:
+            singel_list[key[0]] += value
+        else:
+            singel_list[key[0]] = value
+
+        if key[1] in singel_list:
+            singel_list[key[1]] += value
+        else:
+            singel_list[key[1]] = value
+        sorted_dic = sorted(singel_list.items(),key=lambda  x: x[1],reverse=True)
+    return sorted_dic
+
+
 def main():
     file_name = "tabel1.txt"
     words_with_count = {}
@@ -87,10 +109,11 @@ def main():
             words_with_count[word] = counts
 
     pairs_count = count_pairs_from_multiple_words(words_with_count)
-
+    single_letter_count = something(pairs_count)
+    print(single_letter_count)
     matrix, letters = generate_matrix(pairs_count)
     #print_matrix(matrix, letters)
-    print_list(matrix, letters)
+    #print_list(matrix, letters)
 
 
 main()
