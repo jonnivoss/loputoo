@@ -49,6 +49,8 @@ def make_layout(file):
                     home_row[line[i]] = f(i)
             else:
                 for i in range(len(line)-1):
+                    if line[i] == ' ':
+                        continue
                     if line[i] in home_row:
                         remapped_dict[line[i]] = key(i,j,home_row[line[i]],True)
                         home_row[line[i]] = remapped_dict[line[i]]
@@ -57,7 +59,7 @@ def make_layout(file):
                     else:
                         remapped_dict[line[i]] = key(i,j,f(i%9),False)
             j += 1
-        home_keys = list(home_row)
+        #home_keys = list(home_row)
         home_value = list(home_row.values())
         #siin tuleb kuidagi näpud ära mapida
         last_home = 0
@@ -70,7 +72,7 @@ def make_layout(file):
                     last_home = i
 
                 remapped_dict[letters].finger = f(last_home)
-        remapped_dict['<'].finger = f.lp
+#        remapped_dict['<'].finger = f.lp
 
     return remapped_dict
 

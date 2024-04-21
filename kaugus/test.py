@@ -1,10 +1,4 @@
- #   keyboard = {
- #       'q': (1,0), 'w': (1,1), 'e': (1,2), 'r': (1,3), 't': (2,3), 'y': (2,4), 'u': (1,4), 'i': (1,5), 'o': (1,6), 'p': (1,7),'ü': (1,8),'õ': (2,8),
- #       'a': (0,0), 's': (0,1), 'd': (0,2), 'f': (0,3), 'g': (1,3), 'h': (1,4), 'j': (0,4), 'k': (0,5), 'l': (0,6), 'ö': (0,7),'ä': (1,8),
-#        'z': (1,0), 'x': (1,1), 'c': (1,2), 'v': (1,3), 'b': (2,3), 'n': (1,4), 'm': (1,4), ',': (1,5), '.': (1,6), '-': (2,7),
-#        ' ': (0,9)  # Space key
-#    }
-
+import random
 from enum import Enum
 import math
 from dataclasses import dataclass
@@ -31,20 +25,23 @@ class key:
 
     def __post_init__(self):
         if self.y == 0.0:
-            self.offset = 0.0;
+            self.offset = 0.0
         elif self.y == 1.0:
             self.offset = 0.25
         else:
             self.offset = -0.25
 
 last_finger = f.ri
-keyboard = {}
+
 last_pos_of_fingers = {}
 letter_freq = {}
 
-def finger_distance(char1):
+def finger_distance(char1,keyboard):
     global last_finger
     char1 = char1.lower()
+
+    if char1 == ' ':
+        return 0.0
 
     if char1 not in keyboard:
         return 3.0
@@ -66,13 +63,13 @@ def finger_distance(char1):
     return x
 
 
-def text_distance(text):
+def text_distance(text,keyboard):
     total_distance = 0.0
 
     with open(text, encoding='utf-8') as text_file:
         for line in text_file:
             for i in range(len(line)):
-                distance = finger_distance(line[i])
+                distance = finger_distance(line[i],keyboard)
                 total_distance += distance
         text_file.close()
     return total_distance
@@ -80,15 +77,62 @@ def text_distance(text):
 
 
 text = "text.txt"
-keyboard = kb.make_layout("kboard.txt")
+#keyboard = kb.make_layout("kboard.txt")
 
-#set defaiult pos to home row
-for l, k in keyboard.items():
-    if k.home_row:
-        last_pos_of_fingers[k.finger] = l
+def print_layout(keyboard):
+    sorted_keyboard = dict(sorted(keyboard.items(), key=lambda item: (item[1].y, item[1].x)))
+    i = 0
+    f = open("newkey.txt", "w", encoding='utf-8')
+    for letter, keys in sorted_keyboard.items():
+        if keys.home_row:
+            f.write(letter)
+    f.write("\n")
+    for letter, keys in sorted_keyboard.items():
+        print(f"{letter}({int(keys.home_row)})",end=' ')
+        f.write(letter)
+        i += 1
+        if i%12 == 0:
+            print()
+            f.write("\n")
+    f.write("\n")
+    f.close()
 
-distance = text_distance(text)
-print(f"The total distance needed to write the text is: {distance} units.")
 
-for letter, keys in keyboard.items():
-    print(f"{letter}",end=' ')
+
+def find_distance(keyboard):
+
+    #set defaiult pos to home row
+    for l, k in keyboard.items():
+        if k.home_row:
+            last_pos_of_fingers[k.finger] = l
+    #print(last_pos_of_fingers)
+    distance = text_distance(text,keyboard)
+    print(f"The total distance needed to write the text on  is: {distance} units.")
+    return distance
+
+def randomize_layout(keyboard_):
+    keys = list(keyboard_.keys())
+
+    key1, key2 = random.sample(keys, 2)
+    keyboard_[key1], keyboard_[key2] = keyboard_[key2], keyboard_[key1]
+
+    #key1, key2 = random.sample(keys, 2)
+    #keyboard_[key1], keyboard_[key2] = keyboard_[key2], keyboard_[key1]
+
+    return keyboard_
+
+
+def find_best():
+    keyboard = kb.make_layout("newkey.txt")
+    best_distance = find_distance(keyboard)
+    print("see on algne distants")
+    num = 100
+    for i in range(num):
+        keyboard_ = randomize_layout(keyboard.copy())
+        distance = find_distance(keyboard_)
+        if distance < best_distance:
+            print("siin on parem")
+            best_distance = distance
+            keyboard = keyboard_.copy()
+    print_layout(keyboard)
+find_best()

@@ -73,6 +73,7 @@ def print_list(matrix, letters):
         print(entry[0], end=' ')
         print(entry[1], end=' ')
         print(str(entry[2]).rjust(max_length))
+    return sorted_matrix
 
 
 def something(data):
@@ -93,7 +94,7 @@ def something(data):
             singel_list[key[1]] += value
         else:
             singel_list[key[1]] = value
-        sorted_dic = sorted(singel_list.items(),key=lambda  x: x[1],reverse=True)
+    sorted_dic = sorted(singel_list.items(),key=lambda  x: x[1],reverse=True)
     return sorted_dic
 
 
@@ -113,7 +114,8 @@ def main():
     print(single_letter_count)
     matrix, letters = generate_matrix(pairs_count)
     #print_matrix(matrix, letters)
-    #print_list(matrix, letters)
+    list_pair = print_list(matrix, letters)
+    print(list_pair)
 
 
 main()
