@@ -15,7 +15,6 @@ class f(Enum):
     rp = 7
     thumb = 8
 
-
 @dataclass
 class key:
     x : float
@@ -32,9 +31,13 @@ class key:
             self.offset = -0.25
 
 last_finger = f.ri
-
 last_pos_of_fingers = {}
 letter_freq = {}
+
+def reset_fingers(keyboard):
+    for letters, keys in keyboard.items():
+        if keys.finger.value == last_finger.value and keys.home_row:
+            last_pos_of_fingers[keys.finger] = letters
 
 def finger_distance(char1,keyboard):
     global last_finger
@@ -44,24 +47,31 @@ def finger_distance(char1,keyboard):
         return 0.0
 
     if char1 not in keyboard:
-        return 3.0
+        reset_fingers(keyboard)
+        return 4.0
 
     x = 0.0
+    #hetkene täht
     current_char = keyboard[char1]
     for last, letter in last_pos_of_fingers.items():
+        #hetkel kasutatava sõrme hetke asukoha
         if current_char.finger.value == last.value:
+            #arvutab sõrme liigutamise teekonna pikkuse
             x = math.sqrt(((current_char.x + current_char.offset) - (keyboard[letter].x + keyboard[letter].offset) ) ** 2
                           + (current_char.y - keyboard[letter].y) ** 2)
+            #muudab hetkese sõrme asukohta hetkesele tähele
             last_pos_of_fingers[last] = char1
 
-    if last_finger.value != current_char.finger.value:
-        for letters, keys in keyboard.items():
-            if keys.finger.value == last_finger.value and keys.home_row:
-                last_pos_of_fingers[keys.finger] = letters
-        last_finger = f(current_char.finger.value)
+    #kui viimati vajutatud sõrm erineb hetke sõrmest siis muuda eelmine sõrm tagasi kodu reale
+    #if last_finger.value != current_char.finger.value:
+    #    reset_fingers(keyboard)
+    #    last_finger = f(current_char.finger.value)
+
+    #kui sõrm on väikene siis lisa kerge kaugus juurde, sest väikse sõrm on nõrgem
+    if current_char.finger.value == f.lp.value or current_char.finger.value == f.rp.value:
+        x += 0.7
 
     return x
-
 
 def text_distance(text,keyboard):
     total_distance = 0.0
@@ -74,40 +84,41 @@ def text_distance(text,keyboard):
         text_file.close()
     return total_distance
 
-
-
-text = "text.txt"
-#keyboard = kb.make_layout("kboard.txt")
-
 def print_layout(keyboard):
     sorted_keyboard = dict(sorted(keyboard.items(), key=lambda item: (item[1].y, item[1].x)))
-    i = 0
-    f = open("newkey.txt", "w", encoding='utf-8')
+
+    last_y = 0
+    for letter, keys in sorted_keyboard.items():
+        if keys.y != last_y:
+            print()
+            last_y = keys.y
+        print(f"{letter}({int(keys.home_row)})",end=' ')
+    print()
+
+def save_layout(keyboard, files):
+    sorted_keyboard = dict(sorted(keyboard.items(), key=lambda item: (item[1].y, item[1].x)))
+    last_y = 0
+    f = open(files, "w", encoding='utf-8')
     for letter, keys in sorted_keyboard.items():
         if keys.home_row:
             f.write(letter)
     f.write("\n")
     for letter, keys in sorted_keyboard.items():
-        print(f"{letter}({int(keys.home_row)})",end=' ')
-        f.write(letter)
-        i += 1
-        if i%12 == 0:
-            print()
+        if keys.y != last_y:
+            last_y = keys.y
             f.write("\n")
+        f.write(letter)
+
     f.write("\n")
     f.close()
 
-
-
-def find_distance(keyboard):
-
+def find_distance(text,keyboard):
+    last_pos_of_fingers.clear()
     #set defaiult pos to home row
     for l, k in keyboard.items():
         if k.home_row:
             last_pos_of_fingers[k.finger] = l
-    #print(last_pos_of_fingers)
     distance = text_distance(text,keyboard)
-    print(f"The total distance needed to write the text on  is: {distance} units.")
     return distance
 
 def randomize_layout(keyboard_):
@@ -122,17 +133,18 @@ def randomize_layout(keyboard_):
     return keyboard_
 
 
-def find_best():
-    keyboard = kb.make_layout("newkey.txt")
-    best_distance = find_distance(keyboard)
-    print("see on algne distants")
-    num = 100
+def find_best(text, kbs, num):
+    keyboard = kb.make_layout(kbs)
+    best_distance = find_distance(text,keyboard)
+    best_dist = "{:.2f}".format(best_distance)
+    print(f"algne distants {best_dist}")
     for i in range(num):
         keyboard_ = randomize_layout(keyboard.copy())
-        distance = find_distance(keyboard_)
+        distance = find_distance(text, keyboard_)
         if distance < best_distance:
-            print("siin on parem")
+            #print(f"{i}  on  {distance}")
             best_distance = distance
             keyboard = keyboard_.copy()
-    print_layout(keyboard)
-find_best()
+    best_dist = "{:.2f}".format(best_distance)
+    print(f"lopp distants {best_dist}")
+    return keyboard

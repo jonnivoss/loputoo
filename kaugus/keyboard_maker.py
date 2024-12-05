@@ -57,7 +57,7 @@ def make_layout(file):
                     elif j == 2:
                         remapped_dict[line[i]] = key(i-1, j, f(i % 9), False)
                     else:
-                        remapped_dict[line[i]] = key(i,j,f(i%9),False)
+                        remapped_dict[line[i]] = key(i,j,f(i % 9),False)
             j += 1
         #home_keys = list(home_row)
         home_value = list(home_row.values())
@@ -66,13 +66,10 @@ def make_layout(file):
 
         for letters, keys in remapped_dict.items():
             for i in range(len(home_row)):
-                #print(letters, keys.x+ keys.offset)
-
                 if keys.x == home_value[i].x:
                     last_home = i
 
                 remapped_dict[letters].finger = f(last_home)
-#        remapped_dict['<'].finger = f.lp
 
     return remapped_dict
 
