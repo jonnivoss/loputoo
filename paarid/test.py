@@ -97,6 +97,26 @@ def something(data):
     sorted_dic = sorted(singel_list.items(),key=lambda  x: x[1],reverse=True)
     return sorted_dic
 
+def single_letter_count(wwc):
+    all_pairs = {}
+    total_count = 0
+    for word, counts in wwc.items():
+        for letter in word.lower():
+            if letter == '-':
+                continue
+            total_count += counts['kokku']
+            if letter in all_pairs:
+                all_pairs[letter] += counts['kokku']
+            else:
+                all_pairs[letter] = counts['kokku']
+    sorted_by_letter = sorted(all_pairs.items(), key=lambda item: item[1], reverse=True)
+    #sorted_by_letter = sorted(all_pairs.items())
+    print(total_count,sorted_by_letter)
+    for letter, count in sorted_by_letter:
+        rounded_number = round(count/total_count, 5) * 100
+        print(f"{letter} - {rounded_number:.5f}%")
+
+
 
 def main():
     file_name = "tabel1.txt"
@@ -109,13 +129,14 @@ def main():
             counts = {'kokku': int(parts[2])}
             words_with_count[word] = counts
 
-    pairs_count = count_pairs_from_multiple_words(words_with_count)
-    single_letter_count = something(pairs_count)
-    print(single_letter_count)
-    matrix, letters = generate_matrix(pairs_count)
+    single_letter_count(words_with_count)
+    #pairs_count = count_pairs_from_multiple_words(words_with_count)
+    #single_letter_count = something(pairs_count)
+    #print(single_letter_count)
+    #matrix, letters = generate_matrix(pairs_count)
     #print_matrix(matrix, letters)
-    list_pair = print_list(matrix, letters)
-    print(list_pair)
+    #list_pair = print_list(matrix, letters)
+    #print(list_pair)
 
 
 main()
