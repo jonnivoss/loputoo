@@ -46,6 +46,8 @@ def finger_distance(char1,keyboard):
     if char1 == ' ':
         return 0.0
 
+    #kuna ei ole otseselt kättesaadav klaviatuuril kirjutades,
+    #siis lihtsalt võtta pikk tee, mis
     if char1 not in keyboard:
         reset_fingers(keyboard)
         return 4.0
@@ -67,7 +69,7 @@ def finger_distance(char1,keyboard):
     #    reset_fingers(keyboard)
     #    last_finger = f(current_char.finger.value)
 
-    #kui sõrm on väikene siis lisa kerge kaugus juurde, sest väikse sõrm on nõrgem
+    #kui sõrm on väikene siis lisa kerge kaugus juurde, sest väikse sõrm on nõrgem/lühem
     if current_char.finger.value == f.lp.value or current_char.finger.value == f.rp.value:
         x += 0.7
 
