@@ -5,7 +5,8 @@ klaviatuurid = ["qwerty.txt",
                 "dvorak.txt",
                 "colemak.txt",
                 "workman.txt",
-                "ojoo.txt"]
+                "ojoo.txt",
+                "minu.txt"]
 def lolk():
     folder = "new"
     text = "text.txt"
@@ -20,14 +21,14 @@ def lolk():
 
 
 def teksti_pikkus(klaviatuur):
-    text = "text.txt"
+    text = "tekstid/kirjandus.txt"
     key_file = "klaviatuurid/"+klaviatuur
-    print(key_file)
+    #print(key_file)
     kb = keyboard_maker.make_layout(key_file)
     distance = t.find_distance(text, kb)
-    t.print_layout(kb)
+    #t.print_layout(kb)
     rounded_number = "{:.2f}".format(distance)
-    print(f"{text} pikkus {rounded_number}")
+    print(f"{klaviatuur} pikkus {rounded_number}\n")
 
 for kb in klaviatuurid:
     teksti_pikkus(kb)
