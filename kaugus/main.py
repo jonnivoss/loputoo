@@ -8,7 +8,8 @@ klaviatuurid = ["qwerty.txt",
                 "ojoo.txt",
                 "minu.txt"]
 tekstid = ["kirjandus.txt",
-           "teadus_too.txt"]
+           "teadus_too.txt",
+           "artikkel.txt"]
 def lolk():
     folder = "new"
     text = "text.txt"

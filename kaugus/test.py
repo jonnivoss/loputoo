@@ -50,7 +50,7 @@ def finger_distance(char1,keyboard):
     #siis lihtsalt võtta pikk tee, mis
     if char1 not in keyboard:
         reset_fingers(keyboard)
-        return 4.0
+        return 0.0
 
     x = 0.0
     #hetkene täht
@@ -59,8 +59,9 @@ def finger_distance(char1,keyboard):
         #hetkel kasutatava sõrme hetke asukoha
         if current_char.finger.value == last.value:
             #arvutab sõrme liigutamise teekonna pikkuse
-            x = math.sqrt(((current_char.x + current_char.offset) - (keyboard[letter].x + keyboard[letter].offset) ) ** 2
-                          + (current_char.y - keyboard[letter].y) ** 2)
+            x = math.sqrt(((current_char.x + current_char.offset)
+                        - (keyboard[letter].x + keyboard[letter].offset) ) ** 2
+                        + (current_char.y - keyboard[letter].y) ** 2)
             #muudab hetkese sõrme asukohta hetkesele tähele
             last_pos_of_fingers[last] = char1
 
@@ -125,13 +126,8 @@ def find_distance(text,keyboard):
 
 def randomize_layout(keyboard_):
     keys = list(keyboard_.keys())
-
     key1, key2 = random.sample(keys, 2)
     keyboard_[key1], keyboard_[key2] = keyboard_[key2], keyboard_[key1]
-
-    #key1, key2 = random.sample(keys, 2)
-    #keyboard_[key1], keyboard_[key2] = keyboard_[key2], keyboard_[key1]
-
     return keyboard_
 
 
